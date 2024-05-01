@@ -10,6 +10,10 @@ let pointCount = 0; //to count the number of points already drawn
 let maxPoints = 15; //maximum number of points to draw
 let isRunning = false; //stopping/starting algo
 
+//counting checked edges
+let checkedEdges = 0;
+let counterDiv = document.getElementById('edgeCounter');
+
 // Code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
     if (!visualizationInProgress) { //check if visualization is ongoing
@@ -39,6 +43,10 @@ clearButton.addEventListener('click', function() {
     pointCount = 0; //reset the point counter
     visualizeON3Button.classList.remove('button-active'); //remove outline from buttons
     visualizeONhButton.classList.remove('button-active');
+
+    //clear the edge counter
+    checkedEdges = 0;
+    counterDiv.textContent = 'Edges checked: ' + checkedEdges;
 
     setTimeout(function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -87,10 +95,15 @@ async function convexHullON3(points) {
         if (!isRunning) break;
 
         for (let j = 0; j < n; j++) {
+            if (i == j) continue;
+
             if (!isRunning) break;
 
             let q = points[i], r = points[j];
             let isEdge = true;
+
+            checkedEdges++;
+            counterDiv.textContent = 'Edges checked: ' + checkedEdges;
 
             //continue if theres a red line already
             if (redLines.has(`${q.x},${q.y}-${r.x},${r.y}`) || redLines.has(`${r.x},${r.y}-${q.x},${q.y}`)) {
@@ -119,6 +132,7 @@ async function convexHullON3(points) {
                     break;
                 }
             }
+
             if (isEdge) {
                 //change line color to red (symbolizes final edgeKante)
                 ctx.beginPath();
