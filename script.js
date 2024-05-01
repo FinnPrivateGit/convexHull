@@ -6,16 +6,23 @@ const visualizeONhButton = document.getElementById('visualizeONh');
 
 let points = []; //to store the coords of the points
 let visualizationInProgress = false; //prevent drawing points during visualization
+let pointCount = 0; //to count the number of points already drawn
+let maxPoints = 5; //maximum number of points to draw
 
 // Code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
-    if (!visualizationInProgress) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        drawPoint(x, y);
-        points.push({x, y});
-        localStorage.setItem('points', JSON.stringify(points)); //save the points in the local storage (as strings)
+    if (!visualizationInProgress) { //check if visualization is ongoing
+        if (pointCount < maxPoints) { //check if to many points have been painted
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            drawPoint(x, y);
+            points.push({x, y});
+            localStorage.setItem('points', JSON.stringify(points)); //save the points in the local storage (as strings)
+            pointCount++; //inc point counter
+        } else {
+            alert('You have reached the maximum number of points!');
+        }
     }
 });
 
@@ -27,6 +34,7 @@ clearButton.addEventListener('click', function() {
     visualizationInProgress = false; //stop visualization
     visualizeON3Button.disabled = false; //enable the buttons
     visualizeONhButton.disabled = false;
+    pointCount = 0; //reset the point counter
 });
 
 // Code to draw points on canvas
@@ -39,7 +47,8 @@ function drawPoint(x, y) {
 // Code for ON3 button
 visualizeON3Button.addEventListener('click', function() {
     visualizationInProgress = true;
-    visualizeONhButton.disabled = true; //disable the other button
+    visualizeONhButton.disabled = true; //disable buttons
+    visualizeON3Button.disabled = true;
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
 
     const generator = convexHullON3(savedPoints); //call function
@@ -49,11 +58,12 @@ visualizeON3Button.addEventListener('click', function() {
 // Code for ONh button
 visualizeONhButton.addEventListener('click', function() {
     visualizationInProgress = true;
-    visualizeON3Button.disabled = true; //disable the other button
+    visualizeON3Button.disabled = true; //disable buttons
+    visualizeONhButton.disabled = true;
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
 
     const generator = convexHullONh(savedPoints); //call function
-    
+
 });
 
 // Code to visualize convex hull in O(n^3)
