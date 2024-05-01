@@ -8,6 +8,7 @@ let points = []; //to store the coords of the points
 let visualizationInProgress = false; //prevent drawing points during visualization
 let pointCount = 0; //to count the number of points already drawn
 let maxPoints = 15; //maximum number of points to draw
+let isRunning = false; //stopping/starting algo
 
 // Code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
@@ -28,6 +29,7 @@ canvas.addEventListener('click', function(event) {
 
 // Code to clear the canvas
 clearButton.addEventListener('click', function() {
+    isRunning = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     points = [];
     localStorage.removeItem('points'); //remove the points from the local storage
@@ -37,6 +39,10 @@ clearButton.addEventListener('click', function() {
     pointCount = 0; //reset the point counter
     visualizeON3Button.classList.remove('button-active'); //remove outline from buttons
     visualizeONhButton.classList.remove('button-active');
+
+    setTimeout(function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }, 300); //delay higher than algo delay (that canvas is always empty)
 });
 
 // Code to draw points on canvas
@@ -54,6 +60,7 @@ visualizeON3Button.addEventListener('click', function() {
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
     visualizeON3Button.classList.add('button-active'); //adding outline to button
 
+    isRunning = true;
     convexHullON3(savedPoints); //call function
 
 });
@@ -66,6 +73,7 @@ visualizeONhButton.addEventListener('click', function() {
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
     visualizeONhButton.classList.add('button-active'); //adding outline to button
 
+    isRunning = true;
     convexHullONh(savedPoints); //call function
 
 });
@@ -76,7 +84,11 @@ async function convexHullON3(points) {
     let redLines = new Set(); //to store the red lines
 
     for (let i = 0; i < n; i++) {
+        if (!isRunning) break;
+
         for (let j = 0; j < n; j++) {
+            if (!isRunning) break;
+
             let q = points[i], r = points[j];
             let isEdge = true;
 
@@ -92,9 +104,11 @@ async function convexHullON3(points) {
             ctx.strokeStyle = 'blue';
             ctx.stroke();
 
-            await new Promise(resolve => setTimeout(resolve, 500)); //1 sec delay
+            await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
 
             for (let k = 0; k < n; k++) {
+                if (!isRunning) break;
+
                 if (k === i || k === j) continue;
 
                 let p = points[k];
@@ -124,7 +138,7 @@ async function convexHullON3(points) {
                 ctx.strokeStyle = 'grey';
                 ctx.stroke();
             }
-            await new Promise(resolve => setTimeout(resolve, 500)); //1 sec delay
+            await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
         }
     }
 }
