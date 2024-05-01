@@ -1,9 +1,16 @@
 body {
-    background-color: black;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
-    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+#drawingArea {
+    border: 1px solid #000;
+}
+
+#clearButton {
+    display: block;
+    margin-top: 20px;
 }
