@@ -7,6 +7,7 @@ const visualizeONhButton = document.getElementById('visualizeONh');
 let points = []; //to store the coords of the points
 let visualizationInProgress = false; //prevent drawing points during visualization
 
+// Code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
     if (!visualizationInProgress) {
         const rect = canvas.getBoundingClientRect();
@@ -18,6 +19,7 @@ canvas.addEventListener('click', function(event) {
     }
 });
 
+// Code to clear the canvas
 clearButton.addEventListener('click', function() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     points = [];
@@ -27,6 +29,7 @@ clearButton.addEventListener('click', function() {
     visualizeONhButton.disabled = false;
 });
 
+// Code to draw points on canvas
 function drawPoint(x, y) {
     ctx.beginPath();
     ctx.arc(x, y, 5, 0, Math.PI * 2, true);
@@ -37,10 +40,12 @@ function drawPoint(x, y) {
 visualizeON3Button.addEventListener('click', function() {
     visualizationInProgress = true;
     visualizeONhButton.disabled = true; //disable the other button
+    const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
 });
 
 // Code to visualize convex hull in O(nh)
 visualizeONhButton.addEventListener('click', function() {
     visualizationInProgress = true;
     visualizeON3Button.disabled = true; //disable the other button
+    const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
 });
