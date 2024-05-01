@@ -35,6 +35,8 @@ clearButton.addEventListener('click', function() {
     visualizeON3Button.disabled = false; //enable the buttons
     visualizeONhButton.disabled = false;
     pointCount = 0; //reset the point counter
+    visualizeON3Button.classList.remove('button-active'); //remove outline from buttons
+    visualizeONhButton.classList.remove('button-active');
 });
 
 // Code to draw points on canvas
@@ -50,6 +52,7 @@ visualizeON3Button.addEventListener('click', function() {
     visualizeONhButton.disabled = true; //disable buttons
     visualizeON3Button.disabled = true;
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
+    visualizeON3Button.classList.add('button-active'); //adding outline to button
 
     const generator = convexHullON3(savedPoints); //call function
 
@@ -61,6 +64,7 @@ visualizeONhButton.addEventListener('click', function() {
     visualizeON3Button.disabled = true; //disable buttons
     visualizeONhButton.disabled = true;
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
+    visualizeONhButton.classList.add('button-active'); //adding outline to button
 
     const generator = convexHullONh(savedPoints); //call function
 
