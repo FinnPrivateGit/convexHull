@@ -7,7 +7,7 @@ const visualizeONhButton = document.getElementById('visualizeONh');
 let points = []; //to store the coords of the points
 let visualizationInProgress = false; //prevent drawing points during visualization
 let pointCount = 0; //to count the number of points already drawn
-let maxPoints = 5; //maximum number of points to draw
+let maxPoints = 15; //maximum number of points to draw
 
 // Code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
@@ -54,7 +54,7 @@ visualizeON3Button.addEventListener('click', function() {
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
     visualizeON3Button.classList.add('button-active'); //adding outline to button
 
-    const generator = convexHullON3(savedPoints); //call function
+    convexHullON3(savedPoints); //call function
 
 });
 
@@ -66,16 +66,58 @@ visualizeONhButton.addEventListener('click', function() {
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
     visualizeONhButton.classList.add('button-active'); //adding outline to button
 
-    const generator = convexHullONh(savedPoints); //call function
+    convexHullONh(savedPoints); //call function
 
 });
 
 // Code to visualize convex hull in O(n^3)
-function* convexHullON3(points) {
-    //TODO: Code for O(n^3) visualization
+async function convexHullON3(points) {
+    const n = points.length;
+
+    for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+            let q = points[i], r = points[j];
+            let isEdge = true;
+
+            //draw blue line between q and r
+            ctx.beginPath();
+            ctx.moveTo(q.x, q.y);
+            ctx.lineTo(r.x, r.y);
+            ctx.strokeStyle = 'blue';
+            ctx.stroke();
+
+            for (let k = 0; k < n; k++) {
+                if (k === i || k === j) continue;
+
+                let p = points[k];
+                let crossProduct = (r.x - q.x) * (p.y - q.y) - (r.y - q.y) * (p.x - q.x);
+
+                if (crossProduct < 0) {
+                    isEdge = false;
+                    break;
+                }
+            }
+            if (isEdge) {
+                //change line color to red (symbolizes final edgeKante)
+                ctx.beginPath();
+                ctx.moveTo(q.x, q.y);
+                ctx.lineTo(r.x, r.y);
+                ctx.strokeStyle = 'red';
+                ctx.stroke();
+            } else {
+                //change line color to grey (symbolizes not final edgeKante)
+                ctx.beginPath();
+                ctx.moveTo(q.x, q.y);
+                ctx.lineTo(r.x, r.y);
+                ctx.strokeStyle = 'grey';
+                ctx.stroke();
+            }
+            await new Promise(resolve => setTimeout(resolve, 500)); //1 sec delay
+        }
+    }
 }
 
 // Code to visualize convex hull in O(nh)
-function* convexHullONh(points) {
+function convexHullONh(points) {
     //TODO: Code for O(nh) visualization
 }
