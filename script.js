@@ -36,16 +36,32 @@ function drawPoint(x, y) {
     ctx.fill();
 }
 
-// Code to visualize convex hull in O(n^3)
+// Code for ON3 button
 visualizeON3Button.addEventListener('click', function() {
     visualizationInProgress = true;
     visualizeONhButton.disabled = true; //disable the other button
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
+
+    const generator = convexHullON3(savedPoints); //call function
+
 });
 
-// Code to visualize convex hull in O(nh)
+// Code for ONh button
 visualizeONhButton.addEventListener('click', function() {
     visualizationInProgress = true;
     visualizeON3Button.disabled = true; //disable the other button
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
+
+    const generator = convexHullONh(savedPoints); //call function
+    
 });
+
+// Code to visualize convex hull in O(n^3)
+function* convexHullON3(points) {
+    //TODO: Code for O(n^3) visualization
+}
+
+// Code to visualize convex hull in O(nh)
+function* convexHullONh(points) {
+    //TODO: Code for O(nh) visualization
+}
