@@ -73,11 +73,17 @@ visualizeONhButton.addEventListener('click', function() {
 // Code to visualize convex hull in O(n^3)
 async function convexHullON3(points) {
     const n = points.length;
+    let redLines = new Set(); //to store the red lines
 
     for (let i = 0; i < n; i++) {
-        for (let j = i + 1; j < n; j++) {
+        for (let j = 0; j < n; j++) {
             let q = points[i], r = points[j];
             let isEdge = true;
+
+            //continue if theres a red line already
+            if (redLines.has(`${q.x},${q.y}-${r.x},${r.y}`) || redLines.has(`${r.x},${r.y}-${q.x},${q.y}`)) {
+                continue;
+            }
 
             //draw blue line between q and r
             ctx.beginPath();
@@ -86,13 +92,15 @@ async function convexHullON3(points) {
             ctx.strokeStyle = 'blue';
             ctx.stroke();
 
+            await new Promise(resolve => setTimeout(resolve, 500)); //1 sec delay
+
             for (let k = 0; k < n; k++) {
                 if (k === i || k === j) continue;
 
                 let p = points[k];
                 let crossProduct = (r.x - q.x) * (p.y - q.y) - (r.y - q.y) * (p.x - q.x);
 
-                if (crossProduct < 0) {
+                if (crossProduct > 0) {
                     isEdge = false;
                     break;
                 }
@@ -104,6 +112,10 @@ async function convexHullON3(points) {
                 ctx.lineTo(r.x, r.y);
                 ctx.strokeStyle = 'red';
                 ctx.stroke();
+
+                //add red line to set
+                redLines.add(`${q.x},${q.y}-${r.x},${r.y}`);
+
             } else {
                 //change line color to grey (symbolizes not final edgeKante)
                 ctx.beginPath();
