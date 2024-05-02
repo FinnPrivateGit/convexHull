@@ -234,25 +234,55 @@ async function convexHullONh(points) {
     let p = l, q;
     do {
         q = (p + 1) % n;
+        if (!pointExistsInHull(hull, points[q])) {
+            ctx.fillStyle = 'green'; //potential next point
+            drawPoint(points[q].x, points[q].y);
+        }
     
         for (let i = 0; i < n; i++) {
-            // Skip if point is already in hull array
-            if (pointExistsInHull(hull, points[i])) continue;
-    
+            //skip if point is already in hull array
+            if (pointExistsInHull(hull, points[i]) || q == i) continue;
+            
+            ctx.fillStyle = 'blue'; //current point more right?
+            drawPoint(points[i].x, points[i].y);
+
+            await new Promise(resolve => setTimeout(resolve, 300)); //1 sec delay
+
             if (orientationPoint(points[p], points[i], points[q]) == 2) {
+                if (!pointExistsInHull(hull, points[q])) {
+                    ctx.fillStyle = 'green';
+                    drawPoint(points[i].x, points[i].y);
+                    ctx.fillStyle = 'grey';
+                    drawPoint(points[q].x, points[q].y);
+                }
                 q = i;
+            } else {
+                ctx.fillStyle = 'grey';
+                drawPoint(points[i].x, points[i].y);
             }
         }
+
+        ctx.fillStyle = 'red';
+        drawPoint(points[q].x, points[q].y);
     
         hull.push(points[q]);
         p = q;
     
     } while (p != l);
+
     hull.push(points[l]); //add to final points
 
     for (let i = 0; i < hull.length; i++) {
         ctx.fillStyle = 'red';
         drawPoint(hull[i].x, hull[i].y);
+
+        ctx.beginPath();
+        ctx.moveTo(hull[i].x, hull[i].y);
+        ctx.lineTo(hull[(i + 1) % hull.length].x, hull[(i + 1) % hull.length].y);
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+
+        await new Promise(resolve => setTimeout(resolve, 150)); //1 sec delay
     }
 
 
@@ -267,5 +297,12 @@ function orientationPoint(p, q, r) {
 }
 
 function pointExistsInHull(hull, point) {
-    return hull.some(hullPoint => hullPoint.x === point.x && hullPoint.y === point.y);
+    let exists = false;
+    for (let i = 0; i < hull.length; i++) {
+        if (hull[i].x == point.x && hull[i].y == point.y) {
+            exists = true;
+            break;
+        }
+    }
+    return exists;
 }
