@@ -31,3 +31,9 @@ button.button-active::after {
     bottom: -2px;
     border: 2px solid red;
 }
+
+#info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

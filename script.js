@@ -14,6 +14,8 @@ let isRunning = false; //stopping/starting algo
 let checkedEdges = 0;
 let counterDiv = document.getElementById('edgeCounter');
 
+let statusDiv = document.getElementById('status');
+
 // Code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
     if (!visualizationInProgress) { //check if visualization is ongoing
@@ -47,6 +49,8 @@ clearButton.addEventListener('click', function() {
     //clear the edge counter
     checkedEdges = 0;
     counterDiv.textContent = 'Edges checked: ' + checkedEdges;
+
+    statusDiv.textContent = 'Current status: Drawing';
 
     setTimeout(function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -88,6 +92,7 @@ visualizeONhButton.addEventListener('click', function() {
 
 // Code to visualize convex hull in O(n^3)
 async function convexHullON3(points) {
+    statusDiv.textContent = 'Current status: Algo running';
     const n = points.length;
     let redLines = new Set(); //to store the red lines
 
@@ -155,6 +160,7 @@ async function convexHullON3(points) {
             await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
         }
     }
+    statusDiv.textContent = 'Current status: Algo finished';
 }
 
 // Code to visualize convex hull in O(nh)
