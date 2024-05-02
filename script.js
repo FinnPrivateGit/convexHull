@@ -16,6 +16,11 @@ let counterDiv = document.getElementById('edgeCounter');
 
 let statusDiv = document.getElementById('status');
 
+//code for the info button
+document.getElementById('infoButton').addEventListener('click', function() {
+    window.open('info.html', '_blank');
+});
+
 // Code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
     if (!visualizationInProgress) { //check if visualization is ongoing

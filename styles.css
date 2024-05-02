@@ -37,3 +37,9 @@ button.button-active::after {
     flex-direction: column;
     align-items: center;
 }
+
+#infoButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <section id="overview">
+        <h1>Overview</h1>
+        <p>You can draw points on the square canvas in the middle of the screen.</p>
+        <p>Then you can visualize finding the convex hull of the points using two different algorithms.</p>
+        <p>On the left are stats displayed, how fast the algorithm is and in which state you are currently in.</p>
+        <p>With the "clear points" button you can clear the points and stop an algorithm from running.</p>
+    </section>
+
+    <section id="naive-approach">
+        <h1>Algorithm for finding convex hull, naive approach</h1>
+        <p>This algorithm finds the convex hull in O(n^3).</p>
+        <p>The blue line is the line that currently gets checked if its a "Randkante"</p>
+        <p>The red line is a already found "Randkante"</p>
+        <p>The grey line is a already checked edge which isnt a "Randkante"</p>
+    </section>
+
+    <section id="jarvis-wrap">
+        <h1>Jarvis-Wrap-Algorithm for finding convex hull</h1>
+        <p>This algorithm finds the convex hull in O(nh)</p>
+        <p>In the first step it searches for the farthest point on the right.</p>
+        <p>The green point is the farthest point to the right already found.</p>
+        <p>The blue point is the point that gets checked if its farther to the right than the green point.</p>
+        <p>The grey points are the points that are already checked and arent farthest to the right currently</p>
+        <p>In the second step, the algorithm searches for "Randkanten" counterclockwise</p>
+        <p>The red lines are already found "Randkanten"</p>
+        <p>The green line is the line that currently gets checked as a potential next "Randkante"</p>
+        <p>This is done by comparing it with the blue lines</p>
+        <p>Sometimes the algo overwrites already drawn lines, but I'm to lazy to change it, sorry!</p>
+    </section>
+</body>
+</html>
