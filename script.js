@@ -36,6 +36,7 @@ canvas.addEventListener('click', function(event) {
 // Code to clear the canvas
 clearButton.addEventListener('click', function() {
     isRunning = false;
+    ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     points = [];
     localStorage.removeItem('points'); //remove the points from the local storage
@@ -164,6 +165,101 @@ async function convexHullON3(points) {
 }
 
 // Code to visualize convex hull in O(nh)
-function convexHullONh(points) {
-    //TODO: Code for O(nh) visualization
+async function convexHullONh(points) {
+    const n = points.length;
+
+    if (n < 3) {
+        alert('Convex hull in O(nh) requires at least 3 points!');
+
+        //doing stuff from clear button, but not clearing canvas
+        isRunning = false;
+        ctx.fillStyle = 'black';
+        visualizationInProgress = false;
+        visualizeON3Button.disabled = false;
+        visualizeONhButton.disabled = false;
+        pointCount = 0;
+        visualizeON3Button.classList.remove('button-active');
+        visualizeONhButton.classList.remove('button-active');
+        checkedEdges = 0;
+        counterDiv.textContent = 'Edges checked: ' + checkedEdges;
+        statusDiv.textContent = 'Current status: Drawing';
+
+        return;
+    }
+
+    statusDiv.textContent = 'Current status: finding leftmost point';
+
+    //find leftmost point
+    let l = 0;
+    ctx.fillStyle = 'green'; //green = current leftmost point
+    drawPoint(points[l].x, points[l].y);
+
+    for (let i = 1; i < n; i++) {
+        ctx.fillStyle = 'blue'; //blue = this point more left?
+        drawPoint(points[i].x, points[i].y);
+
+        await new Promise(resolve => setTimeout(resolve, 1000)); //1 sec delay
+
+        if (points[i].x == points[l].x) {
+            if (points[i].y < points[l].y) {
+                ctx.fillStyle = 'green';
+                drawPoint(points[i].x, points[i].y);
+                ctx.fillStyle = 'grey'; //not leftmost point
+                drawPoint(points[l].x, points[l].y);
+                l = i;
+            }
+        } else if (points[i].x < points[l].x) {
+            ctx.fillStyle = 'green';
+            drawPoint(points[i].x, points[i].y);
+            ctx.fillStyle = 'grey';
+            drawPoint(points[l].x, points[l].y);
+            l = i;
+        } else {
+            ctx.fillStyle = 'grey';
+            drawPoint(points[i].x, points[i].y);
+        }
+    }
+
+    //draw leftmost point red
+    ctx.fillStyle = 'red';
+    drawPoint(points[l].x, points[l].y);
+
+    statusDiv.textContent = 'Current status: algo running';
+
+    //start from leftmost point, keep moving counterclockwise
+    //until we reach the start point again
+    let p = l, q;
+    do {
+        //add current point to result
+        //hull.push(points[p]);
+        
+        //search for a point q such that orientation(p, i, q)
+        //is counterclockwise for all points i
+        q = (p + 1) % n;
+        ctx.fillStyle = 'blue';
+
+        for (let i = 0; i < n; i++) {
+            //if i is more counterclockwise than current q, then update q
+            if (orientation(points[p], points[i], points[q]) == 2) {
+                q = i;
+            }
+        }
+
+        //now q is most counterclockwise with respect to p
+        //set p as q for next iteration
+        p = q;
+    
+    } while (p != l); //do this while its not first point again
+
+
+
+
+    statusDiv.textContent = 'Current status: Algo finished';
+}
+
+function orientation(p, q, r) {
+    let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+
+    if (val == 0) return 0;  //collinear
+    return (val > 0)? 1 : 2; //clock or counterclockwise
 }
