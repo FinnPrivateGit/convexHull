@@ -14,14 +14,24 @@ let isRunning = false; //stopping/starting algo
 let checkedEdges = 0;
 let counterDiv = document.getElementById('edgeCounter');
 
+//status div
 let statusDiv = document.getElementById('status');
+
+//slider
+let sliderValue = 100; //initial value
+let slider = document.getElementById('myRange');
+
+document.getElementById('myRange').addEventListener('input', function() {
+    sliderValue = this.value;
+    console.log(sliderValue);
+});
 
 //code for the info button
 document.getElementById('infoButton').addEventListener('click', function() {
     window.open('info.html', '_blank');
 });
 
-// Code to get coords for points (drawing and saving)
+//code to get coords for points (drawing and saving)
 canvas.addEventListener('click', function(event) {
     if (!visualizationInProgress) { //check if visualization is ongoing
         if (pointCount < maxPoints) { //check if to many points have been painted
@@ -48,6 +58,7 @@ clearButton.addEventListener('click', function() {
     visualizationInProgress = false; //stop visualization
     visualizeON3Button.disabled = false; //enable the buttons
     visualizeONhButton.disabled = false;
+    slider.disabled = false; //enable slider
     pointCount = 0; //reset the point counter
     visualizeON3Button.classList.remove('button-active'); //remove outline from buttons
     visualizeONhButton.classList.remove('button-active');
@@ -61,7 +72,7 @@ clearButton.addEventListener('click', function() {
     setTimeout(function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         statusDiv.textContent = 'Current status: Drawing';
-    }, 300); //delay higher than algo delay (that canvas is always empty)
+    }, sliderValue + 1000); //delay higher than algo delay (that canvas is always empty)
 });
 
 // Code to draw points on canvas
@@ -76,6 +87,7 @@ visualizeON3Button.addEventListener('click', function() {
     visualizationInProgress = true;
     visualizeONhButton.disabled = true; //disable buttons
     visualizeON3Button.disabled = true;
+    slider.disabled = true; //disable slider
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
     visualizeON3Button.classList.add('button-active'); //adding outline to button
 
@@ -89,6 +101,7 @@ visualizeONhButton.addEventListener('click', function() {
     visualizationInProgress = true;
     visualizeON3Button.disabled = true; //disable buttons
     visualizeONhButton.disabled = true;
+    slider.disabled = true; //disable slider
     const savedPoints = JSON.parse(localStorage.getItem('points')); //get the points from the local storage
     visualizeONhButton.classList.add('button-active'); //adding outline to button
 
@@ -129,7 +142,7 @@ async function convexHullON3(points) {
             ctx.strokeStyle = 'blue';
             ctx.stroke();
 
-            await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
+            await new Promise(resolve => setTimeout(resolve, sliderValue)); //1 sec delay
 
             for (let k = 0; k < n; k++) {
                 if (!isRunning) break;
@@ -144,6 +157,8 @@ async function convexHullON3(points) {
                     break;
                 }
             }
+            
+            if (!isRunning) break;
 
             if (isEdge) {
                 //change line color to red (symbolizes final edgeKante)
@@ -164,9 +179,11 @@ async function convexHullON3(points) {
                 ctx.strokeStyle = 'grey';
                 ctx.stroke();
             }
-            await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
+            await new Promise(resolve => setTimeout(resolve, sliderValue)); //1 sec delay
         }
     }
+    if (!isRunning) return;
+
     statusDiv.textContent = 'Current status: Algo finished';
 }
 
@@ -187,6 +204,7 @@ async function convexHullONh(points) {
         visualizationInProgress = false;
         visualizeON3Button.disabled = false;
         visualizeONhButton.disabled = false;
+        slider.disabled = false; //enable slider
         pointCount = 0;
         visualizeON3Button.classList.remove('button-active');
         visualizeONhButton.classList.remove('button-active');
@@ -213,7 +231,9 @@ async function convexHullONh(points) {
         checkedEdges++;
         counterDiv.textContent = 'Checks made: ' + checkedEdges;
 
-        await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
+        await new Promise(resolve => setTimeout(resolve, sliderValue)); //1 sec delay
+
+        if (!isRunning) break;
 
         if (points[i].x == points[l].x) {
             if (points[i].y < points[l].y) {
@@ -234,6 +254,8 @@ async function convexHullONh(points) {
             drawPoint(points[i].x, points[i].y);
         }
     }
+
+    if (!isRunning) return;
 
     statusDiv.textContent = 'Current status: algo running';
 
@@ -260,7 +282,9 @@ async function convexHullONh(points) {
             ctx.fillStyle = 'blue'; //current point more right?
             drawPoint(points[i].x, points[i].y);
 
-            await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
+            await new Promise(resolve => setTimeout(resolve, sliderValue)); //1 sec delay
+
+            if (!isRunning) break;
 
             if (orientationPoint(points[p], points[i], points[q]) == 2) {
                 drawLine(p, i, 'green', 1);
@@ -280,6 +304,8 @@ async function convexHullONh(points) {
                 drawPoint(points[i].x, points[i].y);
             }
         }
+        if (!isRunning) break;
+
         drawLine(p, q, 'red', 1);
 
         ctx.fillStyle = 'red';
@@ -305,7 +331,7 @@ async function convexHullONh(points) {
         ctx.strokeStyle = 'red';
         ctx.stroke();
     }
-
+    if (!isRunning) return;
 
     statusDiv.textContent = 'Current status: Algo finished';
 }
@@ -318,6 +344,8 @@ function orientationPoint(p, q, r) {
 }
 
 function pointExistsInHull(hull, point) {
+    if (!isRunning) return;
+
     let exists = false;
     for (let i = 0; i < hull.length; i++) {
         if (!isRunning) break;
@@ -331,6 +359,8 @@ function pointExistsInHull(hull, point) {
 }
 
 function drawLine(pointOne, pointTwo, color, width) {
+    if (!isRunning) return;
+
     ctx.beginPath();
     ctx.moveTo(points[pointOne].x, points[pointOne].y);
     ctx.lineTo(points[pointTwo].x, points[pointTwo].y);
