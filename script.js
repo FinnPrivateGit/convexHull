@@ -165,6 +165,205 @@ async function convexHullON3(points) {
     statusDiv.textContent = 'Current status: Algo finished';
 }
 
+//TODO: the first green line can be overwritten by a blue line, fix this sometime
+// Code to visualize convex hull in O(nh)
+async function convexHullONh(points) {
+    let hull = []; //store final points
+
+    const n = points.length;
+
+    if (n < 3) {
+        alert('Convex hull in O(nh) requires at least 3 points!');
+
+        //doing stuff from clear button, but not clearing canvas
+        isRunning = false;
+        ctx.fillStyle = 'black';
+        visualizationInProgress = false;
+        visualizeON3Button.disabled = false;
+        visualizeONhButton.disabled = false;
+        pointCount = 0;
+        visualizeON3Button.classList.remove('button-active');
+        visualizeONhButton.classList.remove('button-active');
+        checkedEdges = 0;
+        counterDiv.textContent = 'Checks made: ' + checkedEdges;
+        statusDiv.textContent = 'Current status: Drawing';
+
+        return;
+    }
+
+    statusDiv.textContent = 'Current status: finding leftmost point';
+
+    //find leftmost point
+    let l = 0;
+    ctx.fillStyle = 'green'; //green = current leftmost point
+    drawPoint(points[l].x, points[l].y);
+
+    for (let i = 1; i < n; i++) {
+        if (!isRunning) break;
+
+        ctx.fillStyle = 'blue'; //blue = this point more left?
+        drawPoint(points[i].x, points[i].y);
+
+        checkedEdges++;
+        counterDiv.textContent = 'Checks made: ' + checkedEdges;
+
+        await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
+
+        if (points[i].x == points[l].x) {
+            if (points[i].y < points[l].y) {
+                ctx.fillStyle = 'green';
+                drawPoint(points[i].x, points[i].y);
+                ctx.fillStyle = 'grey'; //not leftmost point
+                drawPoint(points[l].x, points[l].y);
+                l = i;
+            }
+        } else if (points[i].x < points[l].x) {
+            ctx.fillStyle = 'green';
+            drawPoint(points[i].x, points[i].y);
+            ctx.fillStyle = 'grey';
+            drawPoint(points[l].x, points[l].y);
+            l = i;
+        } else {
+            ctx.fillStyle = 'grey';
+            drawPoint(points[i].x, points[i].y);
+        }
+    }
+
+    statusDiv.textContent = 'Current status: algo running';
+
+    //start from leftmost point, keep moving counterclockwise
+    //until we reach the start point again
+    let p = l, q;
+    do {
+        if (!isRunning) break;
+
+        q = (p + 1) % n;
+        ctx.beginPath();
+        ctx.moveTo(points[p].x, points[p].y);
+        ctx.lineTo(points[q].x, points[q].y);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'green';
+        ctx.stroke();
+    
+        for (let i = 0; i < n; i++) {
+            if (!isRunning) break;
+
+            //skip if point is already in hull array
+            if (pointExistsInHull(hull, points[i]) || q == i) continue;
+            
+            checkedEdges++;
+            counterDiv.textContent = 'Checks made: ' + checkedEdges;
+            
+            ctx.beginPath();
+            ctx.moveTo(points[q].x, points[q].y);
+            ctx.lineTo(points[i].x, points[i].y);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'blue';
+            ctx.stroke();
+
+            ctx.fillStyle = 'blue'; //current point more right?
+            drawPoint(points[i].x, points[i].y);
+
+            await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
+
+            if (orientationPoint(points[p], points[i], points[q]) == 2) {
+                ctx.beginPath();
+                ctx.moveTo(points[p].x, points[p].y);
+                ctx.lineTo(points[i].x, points[i].y);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'green';
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(points[p].x, points[p].y);
+                ctx.lineTo(points[q].x, points[q].y);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#f0f0f0';
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(points[q].x, points[q].y);
+                ctx.lineTo(points[i].x, points[i].y);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#f0f0f0';
+                ctx.stroke();
+
+                ctx.fillStyle = 'grey';
+                drawPoint(points[i].x, points[i].y);
+
+                q = i;
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(points[q].x, points[q].y);
+                ctx.lineTo(points[i].x, points[i].y);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#f0f0f0';
+                ctx.stroke();
+
+                ctx.fillStyle = 'grey';
+                drawPoint(points[i].x, points[i].y);
+            }
+        }
+        ctx.beginPath();
+        ctx.moveTo(points[p].x, points[p].y);
+        ctx.lineTo(points[q].x, points[q].y);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+
+        ctx.fillStyle = 'red';
+        drawPoint(points[q].x, points[q].y);
+    
+        hull.push(points[q]);
+        p = q;
+    
+    } while (p != l);
+
+    hull.push(points[l]); //add to final points
+
+    for (let i = 0; i < hull.length; i++) {
+        if (!isRunning) break;
+
+        ctx.fillStyle = 'red';
+        drawPoint(hull[i].x, hull[i].y);
+
+        ctx.beginPath();
+        ctx.moveTo(hull[i].x, hull[i].y);
+        ctx.lineTo(hull[(i + 1) % hull.length].x, hull[(i + 1) % hull.length].y);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+    }
+
+
+    statusDiv.textContent = 'Current status: Algo finished';
+}
+
+function orientationPoint(p, q, r) {
+    let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+
+    if (val == 0) return 0;  //collinear
+    return (val > 0)? 1 : 2; //clock or counterclockwise
+}
+
+function pointExistsInHull(hull, point) {
+    let exists = false;
+    for (let i = 0; i < hull.length; i++) {
+        if (!isRunning) break;
+
+        if (hull[i].x == point.x && hull[i].y == point.y) {
+            exists = true;
+            break;
+        }
+    }
+    return exists;
+}
+
+
+
+
+
+/*
 // Code to visualize convex hull in O(nh)
 async function convexHullONh(points) {
     let hull = []; //store final points
@@ -304,22 +503,4 @@ async function convexHullONh(points) {
     statusDiv.textContent = 'Current status: Algo finished';
 }
 
-function orientationPoint(p, q, r) {
-    let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-
-    if (val == 0) return 0;  //collinear
-    return (val > 0)? 1 : 2; //clock or counterclockwise
-}
-
-function pointExistsInHull(hull, point) {
-    let exists = false;
-    for (let i = 0; i < hull.length; i++) {
-        if (!isRunning) break;
-
-        if (hull[i].x == point.x && hull[i].y == point.y) {
-            exists = true;
-            break;
-        }
-    }
-    return exists;
-}
+*/
