@@ -49,12 +49,13 @@ clearButton.addEventListener('click', function() {
 
     //clear the edge counter
     checkedEdges = 0;
-    counterDiv.textContent = 'Edges checked: ' + checkedEdges;
+    counterDiv.textContent = 'Checks made: ' + checkedEdges;
 
     statusDiv.textContent = 'Current status: Drawing';
 
     setTimeout(function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        statusDiv.textContent = 'Current status: Drawing';
     }, 300); //delay higher than algo delay (that canvas is always empty)
 });
 
@@ -109,7 +110,7 @@ async function convexHullON3(points) {
             let isEdge = true;
 
             checkedEdges++;
-            counterDiv.textContent = 'Edges checked: ' + checkedEdges;
+            counterDiv.textContent = 'Checks made: ' + checkedEdges;
 
             //continue if theres a red line already
             if (redLines.has(`${q.x},${q.y}-${r.x},${r.y}`) || redLines.has(`${r.x},${r.y}-${q.x},${q.y}`)) {
@@ -183,7 +184,7 @@ async function convexHullONh(points) {
         visualizeON3Button.classList.remove('button-active');
         visualizeONhButton.classList.remove('button-active');
         checkedEdges = 0;
-        counterDiv.textContent = 'Edges checked: ' + checkedEdges;
+        counterDiv.textContent = 'Checks made: ' + checkedEdges;
         statusDiv.textContent = 'Current status: Drawing';
 
         return;
@@ -197,10 +198,15 @@ async function convexHullONh(points) {
     drawPoint(points[l].x, points[l].y);
 
     for (let i = 1; i < n; i++) {
+        if (!isRunning) break;
+
         ctx.fillStyle = 'blue'; //blue = this point more left?
         drawPoint(points[i].x, points[i].y);
 
-        await new Promise(resolve => setTimeout(resolve, 300)); //1 sec delay
+        checkedEdges++;
+        counterDiv.textContent = 'Checks made: ' + checkedEdges;
+
+        await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
 
         if (points[i].x == points[l].x) {
             if (points[i].y < points[l].y) {
@@ -233,6 +239,8 @@ async function convexHullONh(points) {
     //until we reach the start point again
     let p = l, q;
     do {
+        if (!isRunning) break;
+
         q = (p + 1) % n;
         if (!pointExistsInHull(hull, points[q])) {
             ctx.fillStyle = 'green'; //potential next point
@@ -240,13 +248,18 @@ async function convexHullONh(points) {
         }
     
         for (let i = 0; i < n; i++) {
+            if (!isRunning) break;
+
             //skip if point is already in hull array
             if (pointExistsInHull(hull, points[i]) || q == i) continue;
             
+            checkedEdges++;
+            counterDiv.textContent = 'Checks made: ' + checkedEdges;
+
             ctx.fillStyle = 'blue'; //current point more right?
             drawPoint(points[i].x, points[i].y);
 
-            await new Promise(resolve => setTimeout(resolve, 300)); //1 sec delay
+            await new Promise(resolve => setTimeout(resolve, 200)); //1 sec delay
 
             if (orientationPoint(points[p], points[i], points[q]) == 2) {
                 if (!pointExistsInHull(hull, points[q])) {
@@ -273,6 +286,8 @@ async function convexHullONh(points) {
     hull.push(points[l]); //add to final points
 
     for (let i = 0; i < hull.length; i++) {
+        if (!isRunning) break;
+
         ctx.fillStyle = 'red';
         drawPoint(hull[i].x, hull[i].y);
 
@@ -299,6 +314,8 @@ function orientationPoint(p, q, r) {
 function pointExistsInHull(hull, point) {
     let exists = false;
     for (let i = 0; i < hull.length; i++) {
+        if (!isRunning) break;
+
         if (hull[i].x == point.x && hull[i].y == point.y) {
             exists = true;
             break;
